@@ -1,5 +1,11 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import { HighlightCard } from "../../Components/HighlightCard";
+import {
+  TransactionCard,
+  TransactionCardProps,
+} from "../../Components/TransactionCard";
 import {
   Container,
   Header,
@@ -11,9 +17,61 @@ import {
   UserName,
   Icon,
   HighlightCards,
+  Transactions,
+  Title,
+  TransactionList,
+  LogoutButton,
 } from "./styles";
 
+export interface DataListPros extends TransactionCardProps {
+  id: string;
+}
+
 export function Dashboard() {
+  const [data, setData] = useState<DataListPros[]>([]);
+
+  async function loadTransactions() {
+    const dataKey = "@gofinances:transactions";
+    const response = await AsyncStorage.getItem(dataKey);
+    const transactions = response ? JSON.parse(response) : [];
+
+    const transactionsFormatted: DataListPros[] = transactions.map(
+      (item: DataListPros) => {
+        const amount = Number(item.amount).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+
+        const date = Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }).format(new Date(item.date));
+
+        return {
+          id: item.id,
+          name: item.name,
+          amount,
+          type: item.type,
+          category: item.category,
+          date,
+        };
+      }
+    );
+
+    setData(transactionsFormatted);
+  }
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTransactions();
+    }, [])
+  );
+
   return (
     <Container>
       <Header>
@@ -25,7 +83,9 @@ export function Dashboard() {
               <UserName>Artur</UserName>
             </User>
           </UserInfo>
-          <Icon name="power" />
+          <LogoutButton onPress={() => {}}>
+            <Icon name="power" />
+          </LogoutButton>
         </UserWrapper>
       </Header>
 
@@ -49,6 +109,15 @@ export function Dashboard() {
           type="total"
         />
       </HighlightCards>
+
+      <Transactions>
+        <Title>Listagem</Title>
+        <TransactionList
+          data={data}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <TransactionCard data={item} />}
+        />
+      </Transactions>
     </Container>
   );
 }

@@ -11,7 +11,13 @@ import {
 
 import theme from "./src/global/styles/theme";
 
-import { Dashboard } from "./src/screens/Dashboard";
+import { NavigationContainer } from "@react-navigation/native";
+
+import "intl";
+import "intl/locale-data/jsonp/pt-BR";
+
+import { AppRoutes } from "./src/routes/app.routes";
+import { StatusBar } from "react-native";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -20,9 +26,20 @@ export default function App() {
     Poppins_700Bold,
   });
 
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
+
   return (
     <ThemeProvider theme={theme}>
-      <Dashboard />
+      <StatusBar
+        barStyle="light-content"
+        translucent
+        backgroundColor="transparent"
+      />
+      <NavigationContainer>
+        <AppRoutes />
+      </NavigationContainer>
     </ThemeProvider>
   );
 }
