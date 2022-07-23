@@ -30,7 +30,6 @@ export function SignIn() {
       setIsLoading(true);
       return await signInWithGoogle();
     } catch (error) {
-      console.log(error);
       Alert.alert("Something went wrong, try agasin later!");
       setIsLoading(false);
     }
@@ -40,7 +39,6 @@ export function SignIn() {
       setIsLoading(true);
       return await signInWithApple();
     } catch (error) {
-      console.log(error);
       Alert.alert("Something went wrong, try agasin later!");
       setIsLoading(false);
     }

@@ -76,8 +76,6 @@ export function Resume() {
         new Date(expensive.date).getFullYear() === selectedDate.getFullYear()
     );
 
-    console.log(expensives);
-
     const expensivesTotal = expensives.reduce(
       (accumulator: number, expensive: TransactionData) => {
         return accumulator + Number(expensive.amount);
