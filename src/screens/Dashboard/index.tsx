@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 
 import { useTheme } from "styled-components";
+import { useAuth } from "../../hooks/auth";
 import { HighlightCard } from "../../Components/HighlightCard";
 import {
   TransactionCard,
@@ -49,11 +50,14 @@ export function Dashboard() {
   const [lastTransactionsEntries, setLastTransactionsEntries] = useState("");
   const [lastTransactionsExpensive, setLastTransactionsExpensive] =
     useState("");
+  const [totalInterval, setTotalInterval] = useState("");
 
   const theme = useTheme();
 
+  const { signOut, user } = useAuth();
+
   async function loadTransactions() {
-    const dataKey = "@gofinances:transactions";
+    const dataKey = `@gofinances:transactions_user:${user.id}`;
     const response = await AsyncStorage.getItem(dataKey);
     const transactions = response ? JSON.parse(response) : [];
 
@@ -104,11 +108,14 @@ export function Dashboard() {
           )
       )
     );
+
     setLastTransactionsEntries(
-      `ultima saida dia ${lasTransactionEntriesDate.getDate()} de ${lasTransactionEntriesDate.toLocaleString(
-        "pt-BR",
-        { month: "long" }
-      )}`
+      lasTransactionEntriesDate.getDate() != lasTransactionEntriesDate.getDate()
+        ? " "
+        : `ultima saida dia ${lasTransactionEntriesDate.getDate()} de ${lasTransactionEntriesDate.toLocaleString(
+            "pt-BR",
+            { month: "long" }
+          )}`
     );
 
     const lastTransactionExpensiveDate = new Date(
@@ -123,10 +130,20 @@ export function Dashboard() {
     );
 
     setLastTransactionsExpensive(
-      `ultima saida dia ${lastTransactionExpensiveDate.getDate()} de ${lastTransactionExpensiveDate.toLocaleString(
-        "pt-BR",
-        { month: "long" }
-      )}`
+      lastTransactionExpensiveDate.getDate() !=
+        lastTransactionExpensiveDate.getDate()
+        ? " "
+        : `ultima saida dia ${lastTransactionExpensiveDate.getDate()} de ${lastTransactionExpensiveDate.toLocaleString(
+            "pt-BR",
+            { month: "long" }
+          )}`
+    );
+
+    setTotalInterval(
+      lastTransactionExpensiveDate.getDate() !=
+        lastTransactionExpensiveDate.getDate()
+        ? "Não há movimentações"
+        : `01 a ${lastTransactionsExpensive}`
     );
 
     setHighLightData({
@@ -173,13 +190,13 @@ export function Dashboard() {
           <Header>
             <UserWrapper>
               <UserInfo>
-                <Photo source={{ uri: "http://github.com/arturlima.png" }} />
+                <Photo source={{ uri: user.photo }} />
                 <User>
                   <UserGreeting>Olá, </UserGreeting>
-                  <UserName>Artur</UserName>
+                  <UserName>{user.name}</UserName>
                 </User>
               </UserInfo>
-              <LogoutButton onPress={() => {}}>
+              <LogoutButton onPress={signOut}>
                 <Icon name="power" />
               </LogoutButton>
             </UserWrapper>
@@ -201,7 +218,7 @@ export function Dashboard() {
             <HighlightCard
               title="Total"
               amount={highLightData.total.amount}
-              lastTransaction="01 à 16 de abril"
+              lastTransaction={totalInterval}
               type="total"
             />
           </HighlightCards>
